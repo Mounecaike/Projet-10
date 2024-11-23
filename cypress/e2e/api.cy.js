@@ -16,6 +16,7 @@ describe('E2E Test - Ajouter un produit au panier', () => {
     cy.get('[data-cy="detail-product-add"]').click();
 
     // Intercepte et vérifie la requête API
+    cy.wait(1000);
     cy.wait('@addProductAPI').then((interception) => {
       expect(interception.response.statusCode).to.eq(200); // Statut de succès attendu
 
