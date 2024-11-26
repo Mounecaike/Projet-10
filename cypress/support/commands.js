@@ -8,7 +8,9 @@ Cypress.Commands.add('login', () => {
   Cypress.Commands.add('getAuthToken', () => {
     return 'fake-token-test'; // Remplace par une commande réelle si nécessaire
   });
-  
+Cypress.Commands.add("getBySel", (selector, ...args) => {
+  return cy.get(`[data-cy=${selector}]`, ...args);
+});  
 Cypress.Commands.add('apiRequest', (method, url, body = null) => {
 const token = Cypress.env('authToken'); // Récupère le token stocké
 
