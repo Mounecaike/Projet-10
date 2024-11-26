@@ -1,3 +1,5 @@
+import { XssTest } from "../support/commands";
+
 describe('E2E Test - Ajouter un produit au panier', () => {
     beforeEach(() => {
       window.localStorage.setItem('authToken', 'fake-token-test');
