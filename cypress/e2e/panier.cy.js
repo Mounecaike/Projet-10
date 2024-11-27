@@ -1,36 +1,58 @@
 import { XssTest } from "../support/commands";
+import { faker } from '@faker-js/faker'
+let RandomUser;
 
-describe('E2E Test - Ajouter un produit au panier', () => {
+describe('E2E Test - simule diverse connexion', () => {
     beforeEach(() => {
-      window.localStorage.setItem('authToken', 'fake-token-test');
-      cy.visit('/');
-    });
+      const password = faker.internet.password();
+        RandomUser = {
+          email: faker.internet.email(),
+          firstName: faker.person.firstName(), 
+          lastName: faker.person.lastName(),  
+          password: password,
+          confirmPassword: password,
+          address: {
+            street: faker.location.streetAddress(), 
+            city: faker.location.city(),           
+            zipCode: faker.location.zipCode(),    
+            country: faker.location.country(),     
+          },
+        };
+        window.localStorage.setItem('authToken', 'fake-token-test');
+        cy.visit('/');
+      });
     it('ajout d\'un produit en rupture de stock', () => {
-        cy.login();
-        cy.get('[data-cy="nav-link-logout"]').should('be.visible');
-        cy.visit('/products/3');
-        cy.get('[data-cy="detail-product-add"]').click();
+    cy.login();
+    cy.getBySel('nav-link-logout').should('be.visible');
+    cy.visit('/products/3');
+    cy.getBySel('detail-product-add').click();
     })
     it('ajout d\'un produit au panier', () => {
         cy.login();
-        cy.get('[data-cy="nav-link-logout"]').should('be.visible');
+        cy.getBySel('nav-link-logout').should('be.visible');
         cy.visit('/products/6');
-        cy.get('[data-cy="detail-product-add"]').click();
+        cy.getBySel('detail-product-add').click();
         cy.visit('/cart');
         cy.wait(1000);
-        cy.get('[data-cy="cart-line-name"]').should('contain.text', 'Dans la forêt');
-             })
-    it('ajout au panier d\'une quantité superieur au stock', () => {
+        cy.getBySel('cart-line')
+        .find('.product-name') // Utilisation de la classe .product-name
+        .find('[data-cy="cart-line-name"]')
+        .should('contain.text', 'Extrait de nature');
+                });
+        it('ajout au panier d\'une quantité superieur au stock', () => {
         cy.login();
-        cy.get('[data-cy="nav-link-logout"]').should('be.visible');
+        cy.getBySel('nav-link-logout').should('be.visible');
         cy.visit('/products/7');
-        cy.get('[data-cy="detail-product-quantity"]')
+        cy.getBySel('detail-product-quantity')
         .clear()
         .type('3');
-        cy.get('[data-cy="detail-product-add"]').click();
-        cy.visit('/cart');
-        cy.get('[data-cy="cart-line-name"]').should('contain.text', 'Extrait de nature');
-    })
+        cy.getBySel('detail-product-add').click();
+        cy.wait(1000);
+        cy.getBySel('cart-line')
+        .find('.product-name') 
+        .find('[data-cy="cart-line-name"]')
+        .should('contain.text', 'Extrait de nature');
+        });
 });
 describe('E2E Test - gestion des produits dans le panier', () => {
     beforeEach(() => {
@@ -39,73 +61,89 @@ describe('E2E Test - gestion des produits dans le panier', () => {
     });
     it('supression d\'un produit dans le panier', () => {
         cy.login();
-        cy.get('[data-cy="nav-link-logout"]').should('be.visible');
+        cy.getBySel('nav-link-logout').should('be.visible');
         cy.visit('/products/7');
-        cy.get('[data-cy="detail-product-add"]').click();
+        cy.getBySel('detail-product-add').click();
         cy.visit('/cart');
         cy.wait(1000);
-        cy.contains('[data-cy="cart-line-name"]', 'Extrait de nature') // Trouve le produit par nom
-        .parents('[data-cy="cart-line"]') // Remonte à l'élément parent
+        cy.getBySel('cart-line')        
         .find('[data-cy="cart-line-delete"]') // Trouve la corbeille
         .click(); // Clique sur la corbeille
-        cy.contains('[data-cy="cart-line-name"]', 'Extrait de nature').should('not.exist');
+        cy.getBySel('cart-line')
+        .find('.product-name') 
+        .find('[data-cy="cart-line-name"]')
+        cy.contains('cart-line-name', 'Extrait de nature').should('not.exist');
         })
     it('modification de la quantité', () => {
         cy.login();
-        cy.get('[data-cy="nav-link-logout"]').should('be.visible');
+        cy.getBySel('nav-link-logout').should('be.visible');
         cy.visit('/products/7');
-        cy.get('[data-cy="detail-product-quantity"]')
+        cy.getBySel('detail-product-quantity')
         .clear()
         .type('3');
-        cy.get('[data-cy="detail-product-add"]').click();
+        cy.getBySel('detail-product-add').click();
         cy.visit('/cart');
         cy.wait(1000);
-        cy.contains('[data-cy="cart-line-name"]', 'Extrait de nature') // Trouve le produit par nom
-        .parents('[data-cy="cart-line"]') // Remonte à l'élément parent
-        .find('[data-cy="cart-line-quantity"]')
-        .clear()
-        cy.contains('[data-cy="cart-line-name"]', 'Extrait de nature')
-        .parents('[data-cy="cart-line"]')
-        .find('[data-cy="cart-line-quantity"]')
-        .should('have.value', '1');
-        })
+        cy.getBySel('cart-line')        
+        .find('[data-cy="cart-line-quantity"]') // Trouve la corbeille
+        .clear() // Efface la valeur actuelle
+        cy.getBySel('cart-line')        
+        .find('[data-cy="cart-line-quantity"]') // Trouve la corbeille
+        .should('have.value', '1'); // Vérifie que la quantité est bien mise à 1
+              })
     it('Validation de commande', () => {
         cy.login();
-        cy.get('[data-cy="nav-link-logout"]').should('be.visible');
+        cy.getBySel('nav-link-logout').should('be.visible');
         cy.visit('/cart');
         cy.wait(1000);
-        cy.get('[data-cy="cart-input-address"]').type('10 rue du test');
-        cy.get('[data-cy="cart-input-zipcode"]').type('01100');
-        cy.get('[data-cy="cart-input-city"]').type('testland');
-        cy.get('[data-cy="cart-submit"]').click();
+        cy.getBySel("cart-input-address").type(RandomUser.address.street);
+        cy.getBySel("cart-input-zipcode").type('42600');
+        cy.getBySel("cart-input-city").type(RandomUser.address.city);
+        cy.getBySel('cart-submit').click();
         cy.url().should('include', '/confirmation'); // Vérifie l'URL
     });
 });
 describe('E2E Test - gestion du formulaire', () => {
     beforeEach(() => {
+        const password = faker.internet.password();
+            RandomUser = {
+            email: faker.internet.email(),
+            firstName: faker.person.firstName(), 
+            lastName: faker.person.lastName(),  
+            password: password,
+            confirmPassword: password,
+            address: {
+                street: faker.location.streetAddress(), 
+                city: faker.location.city(),           
+                zipCode: faker.location.zipCode(),    
+                country: faker.location.country(),     
+            },
+            };
+    
       window.localStorage.setItem('authToken', 'fake-token-test');
       cy.visit('/');
     });
     it('vérification de la faille XSS', () => {
         cy.login();
-        cy.get('[data-cy="nav-link-logout"]').should('be.visible');
+        cy.getBySel('nav-link-logout').should('be.visible');
+        cy.visit('/products/6');
+        cy.getBySel('detail-product-add').click();
         cy.visit('/cart');
         cy.wait(1000);
-        cy.get('[data-cy="cart-input-lastname"]')
-        .clear()
-        .type('<script>alert("XSS")</script>');
-        cy.get('[data-cy="cart-input-firstname"]')
-        .clear()
-        .type('<script>alert("XSS")</script>');
-        cy.get('[data-cy="cart-input-address"]').type('<script>alert("XSS")</script>');
-        cy.get('[data-cy="cart-input-zipcode"]').type('42600');
-        cy.get('[data-cy="cart-input-city"]').type('<script>alert("XSS")</script>');
-        cy.get('[data-cy="cart-submit"]').click();
+        cy.getBySel('cart-form').within(() => {
+            cy.getBySel('cart-input-lastname').clear().type(XssTest);
+            cy.getBySel('cart-input-firstname').clear().type(XssTest);
+            cy.getBySel('cart-input-address').clear().type(XssTest);
+            cy.getBySel('cart-input-zipcode').clear().type('42600');
+            cy.getBySel('cart-input-city').clear().type(XssTest);
+            cy.getBySel('cart-submit').click();
+          });
+                  cy.wait(1000)
         cy.on('window:alert', (txt) => {
             expect(txt).to.not.include('XSS');
           });
       
-          cy.get('[data-cy="error-message"]').should('not.contain', '<script>');
+          cy.getBySel('error-message').should('not.contain', '<script>');
     });
 
 });
