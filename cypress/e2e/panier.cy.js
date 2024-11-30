@@ -4,7 +4,57 @@ let RandomUser;
 
 describe('E2E Test - simule diverse connexion', () => {
     beforeEach(() => {
-      const password = faker.internet.password();
+        window.localStorage.setItem('authToken', 'fake-token-test');
+        cy.visit('/');
+      });
+    it('ajout d\'un produit en rupture de stock', () => {
+    cy.login();
+    cy.getBySel('nav-link-logout').should('be.visible');
+    cy.intercept('GET', '/products/3').as('getProduct');
+    cy.visit('/products/3');
+    cy.wait('@getProduct').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200); // Vérifie le code 200
+        expect(interception.response.body.id).to.eq(3); // Vérifie que l'ID du produit est correct
+        expect(interception.response.body.name).to.exist;
+    });
+    cy.getBySel('detail-product-add').click();
+    })
+    it('ajout d\'un produit au panier', () => {
+        cy.login();
+        cy.getBySel('nav-link-logout').should('be.visible');
+        cy.intercept('GET', '/orders').as('getCart');
+        cy.visit('/products/6');
+        cy.getBySel('detail-product-add').click();
+        cy.visit('/cart');
+        cy.wait(1000);
+        cy.getBySel('cart-line')
+        .find('.product-name') // Utilisation de la classe .product-name
+        .find('[data-cy="cart-line-name"]')
+        .should('contain.text', 'Extrait de nature');
+        cy.wait('@getCart').then((interception) => {
+            expect(interception.response.statusCode).to.eq(200); // Vérifie le statut 200
+            expect(interception.response.body).to.have.property('products');
+            expect(interception.request.headers).to.have.property('authorization');
+        });
+    });
+    it('ajout au panier d\'une quantité superieur au stock', () => {
+    cy.login();
+    cy.getBySel('nav-link-logout').should('be.visible');
+    cy.visit('/products/7');
+    cy.getBySel('detail-product-quantity')
+    .clear()
+    .type('3');
+    cy.getBySel('detail-product-add').click();
+    cy.wait(1000);
+    cy.getBySel('cart-line')
+    .find('.product-name') 
+    .find('[data-cy="cart-line-name"]')
+    .should('contain.text', 'Extrait de nature');
+    });
+});
+describe('E2E Test - gestion des produits dans le panier', () => {
+    beforeEach(() => {
+        const password = faker.internet.password();
         RandomUser = {
           email: faker.internet.email(),
           firstName: faker.person.firstName(), 
@@ -18,44 +68,6 @@ describe('E2E Test - simule diverse connexion', () => {
             country: faker.location.country(),     
           },
         };
-        window.localStorage.setItem('authToken', 'fake-token-test');
-        cy.visit('/');
-      });
-    it('ajout d\'un produit en rupture de stock', () => {
-    cy.login();
-    cy.getBySel('nav-link-logout').should('be.visible');
-    cy.visit('/products/3');
-    cy.getBySel('detail-product-add').click();
-    })
-    it('ajout d\'un produit au panier', () => {
-        cy.login();
-        cy.getBySel('nav-link-logout').should('be.visible');
-        cy.visit('/products/6');
-        cy.getBySel('detail-product-add').click();
-        cy.visit('/cart');
-        cy.wait(1000);
-        cy.getBySel('cart-line')
-        .find('.product-name') // Utilisation de la classe .product-name
-        .find('[data-cy="cart-line-name"]')
-        .should('contain.text', 'Extrait de nature');
-                });
-        it('ajout au panier d\'une quantité superieur au stock', () => {
-        cy.login();
-        cy.getBySel('nav-link-logout').should('be.visible');
-        cy.visit('/products/7');
-        cy.getBySel('detail-product-quantity')
-        .clear()
-        .type('3');
-        cy.getBySel('detail-product-add').click();
-        cy.wait(1000);
-        cy.getBySel('cart-line')
-        .find('.product-name') 
-        .find('[data-cy="cart-line-name"]')
-        .should('contain.text', 'Extrait de nature');
-        });
-});
-describe('E2E Test - gestion des produits dans le panier', () => {
-    beforeEach(() => {
       window.localStorage.setItem('authToken', 'fake-token-test');
       cy.visit('/');
     });
@@ -94,12 +106,18 @@ describe('E2E Test - gestion des produits dans le panier', () => {
     it('Validation de commande', () => {
         cy.login();
         cy.getBySel('nav-link-logout').should('be.visible');
+        cy.intercept('POST', '/orders').as('createOrder');
         cy.visit('/cart');
         cy.wait(1000);
         cy.getBySel("cart-input-address").type(RandomUser.address.street);
         cy.getBySel("cart-input-zipcode").type('42600');
         cy.getBySel("cart-input-city").type(RandomUser.address.city);
         cy.getBySel('cart-submit').click();
+        cy.wait('@createOrder').then((interception) => {
+            // Vérifie que la requête a bien été envoyée
+            expect(interception.response.statusCode).to.eq(201); // Vérifie le statut 201 Created
+            expect(interception.response.body).to.have.property('orderId'); // Vérifie la présence d'un ID de commande
+            });
         cy.url().should('include', '/confirmation'); // Vérifie l'URL
     });
 });
