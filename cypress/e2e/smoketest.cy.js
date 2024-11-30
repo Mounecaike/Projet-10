@@ -52,12 +52,24 @@ describe('Smoke Tests', () => {
     cy.getBySel('review-input-title').type(reviewTitle);
     cy.getBySel('review-input-comment').type(reviewComment);
     cy.getBySel('review-submit').click();
+    cy.wait(1000)
+    cy.wait('@loginRequest').then((interception) => {
+      expect(interception.response.statusCode).to.eq(401);
+      expect(interception.response.body.message).to.eq('Invalid credentials.');
+    });
+
     cy.contains(reviewTitle).should('be.visible');
     cy.contains(reviewComment).should('be.visible');
     });
 
   it('page produits', () => {
+    cy.intercept('GET', '/api/products').as('getProducts');
     cy.visit('/products');
+    cy.wait(1000)
+    cy.wait('@getProducts').then((interception) => { //verifier que l'on l'api renvoi bien la liste des produits
+      expect(interception.response.statusCode).to.eq(200);
+      expect(interception.response.body).to.be.an('array');
+    });
     cy.getBySel('product-link').eq(0).click();
     cy.url().should('include', '/products');
     const selectors = [
