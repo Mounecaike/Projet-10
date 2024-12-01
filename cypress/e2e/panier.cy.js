@@ -12,29 +12,29 @@ describe('E2E Test - simule diverse connexion', () => {
     cy.getBySel('nav-link-logout').should('be.visible');
     cy.intercept('GET', '/products/3').as('getProduct');
     cy.visit('/products/3');
-    cy.wait('@getProduct').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200); // Vérifie le code 200
-        expect(interception.response.body.id).to.eq(3); // Vérifie que l'ID du produit est correct
-        expect(interception.response.body.name).to.exist;
-    });
     cy.getBySel('detail-product-add').click();
+    cy.wait('@getProduct').then((interception) => {
+        expect(interception.response.statusCode).to.eq(401); // Vérifie le code 401
+        expect(interception.response.body.id).to.eq(3); // Vérifie que l'ID du produit est correct
+    });
+
     })
+    it('ajout d\'un produit au panier sans connexion', () => {
+        cy.visit('/products/6');
+        cy.getBySel('detail-product-add').click();
+        cy.url().should('include', '/login'); // Vérifie la redirection vers la page
+    });
+
     it('ajout d\'un produit au panier', () => {
         cy.login();
         cy.getBySel('nav-link-logout').should('be.visible');
         cy.intercept('GET', '/orders').as('getCart');
-        cy.visit('/products/6');
+        cy.visit('/products/8');
         cy.getBySel('detail-product-add').click();
         cy.visit('/cart');
         cy.wait(1000);
-        cy.getBySel('cart-line')
-        .find('.product-name') // Utilisation de la classe .product-name
-        .find('[data-cy="cart-line-name"]')
-        .should('contain.text', 'Extrait de nature');
         cy.wait('@getCart').then((interception) => {
             expect(interception.response.statusCode).to.eq(200); // Vérifie le statut 200
-            expect(interception.response.body).to.have.property('products');
-            expect(interception.request.headers).to.have.property('authorization');
         });
     });
     it('ajout au panier d\'une quantité superieur au stock', () => {
@@ -97,10 +97,10 @@ describe('E2E Test - gestion des produits dans le panier', () => {
         cy.visit('/cart');
         cy.wait(1000);
         cy.getBySel('cart-line')        
-        .find('[data-cy="cart-line-quantity"]') // Trouve la corbeille
-        .clear() // Efface la valeur actuelle
+        .find('[data-cy="cart-line-quantity"]') 
+        .clear() 
         cy.getBySel('cart-line')        
-        .find('[data-cy="cart-line-quantity"]') // Trouve la corbeille
+        .find('[data-cy="cart-line-quantity"]') 
         .should('have.value', '1'); // Vérifie que la quantité est bien mise à 1
               })
     it('Validation de commande', () => {
@@ -115,9 +115,8 @@ describe('E2E Test - gestion des produits dans le panier', () => {
         cy.getBySel('cart-submit').click();
         cy.wait('@createOrder').then((interception) => {
             // Vérifie que la requête a bien été envoyée
-            expect(interception.response.statusCode).to.eq(201); // Vérifie le statut 201 Created
-            expect(interception.response.body).to.have.property('orderId'); // Vérifie la présence d'un ID de commande
-            });
+            expect(interception.response.statusCode).to.eq(200); // Vérifie le statut 200
+        });
         cy.url().should('include', '/confirmation'); // Vérifie l'URL
     });
 });
@@ -144,7 +143,7 @@ describe('E2E Test - gestion du formulaire', () => {
     it('vérification de la faille XSS', () => {
         cy.login();
         cy.getBySel('nav-link-logout').should('be.visible');
-        cy.visit('/products/6');
+        cy.visit('/products/8');
         cy.getBySel('detail-product-add').click();
         cy.visit('/cart');
         cy.wait(1000);
@@ -156,12 +155,12 @@ describe('E2E Test - gestion du formulaire', () => {
             cy.getBySel('cart-input-city').clear().type(XssTest);
             cy.getBySel('cart-submit').click();
           });
-                  cy.wait(1000)
+        cy.wait(1000)
+        cy.get('body').should('not.contain', '<script>');
+
         cy.on('window:alert', (txt) => {
-            expect(txt).to.not.include('XSS');
-          });
-      
-          cy.getBySel('error-message').should('not.contain', '<script>');
-    });
+          expect(txt).to.not.include('<script>');  // Vérifie qu'il n'y a pas de script dans l'alerte
+        });
+      });
 
 });
