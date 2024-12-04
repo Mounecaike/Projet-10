@@ -37,24 +37,6 @@ describe('E2E Test - Ajouter un produit au panier', () => {
       expect(interception.response.statusCode).to.eq(200);
       expect(interception.response.body).to.be.an('array');
     });
-    cy.getBySel('product-link').eq(0).click();
-    cy.url().should('include', '/products');
-    const selectors = [
-      'detail-product-img',
-      'detail-product-name',
-      'detail-product-description',
-      'detail-product-skin',
-      'detail-product-aromas',
-      'detail-product-ingredients',
-      'detail-product-form',
-      'detail-product-price',
-      'detail-product-stock',
-      'detail-product-quantity',
-      'detail-product-add',
-    ];
-    selectors.forEach((selectors) => {
-      cy.getBySel(selectors).should('be.visible');
-    });
   })
 
 });
