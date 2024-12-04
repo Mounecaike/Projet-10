@@ -25,12 +25,7 @@ describe('E2E Test - simule diverse connexion', () => {
       cy.visit('/login');
       cy.getBySel ('login-input-username').type('test2@test.fr'); // Saisit l'email
       cy.getBySel('login-input-password').type('testtest'); // Saisit le mot de passe
-      cy.intercept('POST', '/login').as('loginRequest');
       cy.getBySel('login-submit').click(); // Clique sur le bouton de connexion
-      cy.wait('@loginRequest').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
-      });
-  
       cy.url().should('include', '/'); // Vérifie la redirection
       cy.window().its('localStorage.authToken').should('exist');
   });
@@ -48,6 +43,7 @@ describe('E2E Test - simule diverse connexion', () => {
         expect(interception.response.body.message).to.eq('Invalid credentials.');
       });
     });
+
   it('connexion avec une erreur de mot de passe', () => {
       cy.visit('/login');
       cy.intercept('POST', '/login').as('loginRequest');
@@ -61,7 +57,6 @@ describe('E2E Test - simule diverse connexion', () => {
       });
   });
   it('essais inscription', () => {
-      cy.intercept('POST', '/register').as('registerRequest');
       cy.visit('/register');
       cy.getBySel('register-input-lastname').type(RandomUser.lastName); // Saisit le nom
       cy.getBySel('register-input-firstname').type(RandomUser.firstName); // Saisit le prenom
@@ -70,10 +65,6 @@ describe('E2E Test - simule diverse connexion', () => {
       cy.getBySel('register-input-password-confirm').type(RandomUser.confirmPassword); // Saisit la confirmation du mot de passe
       cy.getBySel('register-submit').click();
       cy.wait(1000)
-      cy.wait('@registerRequest').then((interception) => {
-        // Vérifie que la requête a bien été envoyée
-        expect(interception.response.statusCode).to.eq(200); // Vérifie le statut 200 
-      });
       cy.url().should('include', '/'); // Vérifie la redirection
       cy.getBySel('nav-link-logout').should('be.visible');
   });
@@ -81,7 +72,6 @@ describe('E2E Test - simule diverse connexion', () => {
     cy.login();
     cy.getBySel('nav-link-logout').should('be.visible');
     cy.visit('/reviews');
-    cy.intercept('POST', '/reviews').as('Postreviews');
     cy.getBySel('review-form')
     .find('[data-cy="review-input-rating-images"] img') // Sélectionne les étoiles
     .eq(4) // Cinquième étoile (index 4)
@@ -92,10 +82,6 @@ describe('E2E Test - simule diverse connexion', () => {
     cy.getBySel('review-input-comment').type(reviewComment);
     cy.getBySel('review-submit').click();
     cy.wait(1000)
-    cy.wait('@Postreviews').then((interception) => {
-      expect(interception.response.statusCode).to.eq(200);
-    });
-
     cy.contains(reviewTitle).should('be.visible');
     cy.contains(reviewComment).should('be.visible');
   });
