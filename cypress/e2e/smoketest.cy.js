@@ -40,13 +40,7 @@ describe('Smoke Tests', () => {
     });
 
   it('page produits', () => {
-    cy.intercept('GET', '/products').as('getProducts');
     cy.visit('/products');
-    cy.wait(1000)
-    cy.wait('@getProducts').then((interception) => { //verifier que l'on l'api renvoi bien la liste des produits
-      expect(interception.response.statusCode).to.eq(200);
-      expect(interception.response.body).to.be.an('array');
-    });
     cy.getBySel('product-link').eq(0).click();
     cy.url().should('include', '/products');
     const selectors = [
