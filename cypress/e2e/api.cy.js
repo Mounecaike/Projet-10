@@ -194,6 +194,94 @@ it('Laissez un avis', () => {
     cy.url().should('include', '/'); // Vérifie la redirection
     cy.getBySel('nav-link-logout').should('be.visible');
 });
+     // TEST FAILLE XSS //
+     it('Test de faille sur le formulaire d\'inscription', () => {
+      cy.visit('/register');
+  
+      // Injection XSS dans chaque champ
+      cy.getBySel('register-input-lastname').type(XssTest);
+      cy.getBySel('register-input-firstname').type(XssTest);
+      cy.getBySel('register-input-email').type(RandomUser.email);
+      cy.getBySel('register-input-password').type(XssTest);
+      cy.getBySel('register-input-password-confirm').type(XssTest);
+      cy.getBySel('register-submit').click();
+      cy.wait(1000)
+      cy.get('body').should('not.contain', '<script>');
 
-});
+      cy.on('window:alert', (txt) => {
+        expect(txt).to.not.include('<script>');  // Vérifie qu'il n'y a pas de script dans l'alerte
+      });
+        
+    });
+    it('Test de faille sur le login', () => {
+        cy.visit('/login');
+    
+        // Injection XSS dans chaque champ
+        cy.getBySel('login-input-username').type(RandomUser.email); 
+        cy.getBySel('login-input-password').type(XssTest); 
+        cy.getBySel('login-submit').click(); 
+        cy.wait(1000)
+        cy.get('body').should('not.contain', '<script>');
+  
+        cy.on('window:alert', (txt) => {
+          expect(txt).to.not.include('<script>');  // Vérifie qu'il n'y a pas de script dans l'alerte
+        });
+      
+      });
+  
+    it('Test de faille sur le mot de passe', () => {
+        cy.visit('/login');
+
+        // Injection XSS dans chaque champ
+        cy.getBySel('login-input-username').type('test2@test.fr'); 
+        cy.getBySel('login-input-password').type(XssTest); 
+        cy.getBySel('login-submit').click(); 
+        cy.wait(1000)
+        cy.get('body').should('not.contain', '<script>');
+        cy.on('window:alert', (txt) => {
+          expect(txt).to.not.include('<script>'); 
+        });
+    })
+    it('Test de faille sur les avis', () => {
+        cy.login();
+        cy.getBySel('nav-link-logout').should('be.visible');
+        cy.visit('/reviews');
+        cy.getBySel('review-form')
+        .find('[data-cy="review-input-rating-images"] img') // Sélectionne les étoiles
+        .eq(4) // Cinquième étoile (index 4)
+        .click();
+        cy.getBySel('review-input-title').type(XssTest);
+        cy.getBySel('review-input-comment').type(XssTest);
+        cy.getBySel('review-submit').click();
+        cy.wait(1000)
+        cy.get('body').should('not.contain', '<script>');
+        cy.on('window:alert', (txt) => {
+          expect(txt).to.not.include('<script>'); 
+        });
+    });
+    it('vérification de la faille XSS', () => {
+      cy.login();
+      cy.getBySel('nav-link-logout').should('be.visible');
+      cy.visit('/products/8');
+      cy.getBySel('detail-product-add').click();
+      cy.wait(1000);
+      cy.visit('/cart');
+      cy.wait(1000);
+      cy.getBySel('cart-form').within(() => {
+          cy.getBySel('cart-input-lastname').clear().type(XssTest);
+          cy.getBySel('cart-input-firstname').clear().type(XssTest);
+          cy.getBySel('cart-input-address').clear().type(XssTest);
+          cy.getBySel('cart-input-zipcode').clear().type('42600');
+          cy.getBySel('cart-input-city').clear().type(XssTest);
+          cy.getBySel('cart-submit').click();
+        });
+      cy.wait(1000)
+      cy.get('body').should('not.contain', '<script>');
+
+      cy.on('window:alert', (txt) => {
+        expect(txt).to.not.include('<script>');  // Vérifie qu'il n'y a pas de script dans l'alerte
+      });
+    });
+
+  });
 
