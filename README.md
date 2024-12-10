@@ -7,18 +7,18 @@ Pour le lancement du projet, vous aurez besoin de Docker, Node.js, NPM, cypress 
 2 - Lancer le backend
     - Lancer docker desktop
     - Lancer votre terminal de commande dans le dossier racine du projet
-       - Saisir *docker-compose up*
+       - Saisir *docker-compose up* et appuyer sur entrée pour lancer la commande.
     
     - Le site est maintenant accessible a l'adresse : http://localhost:8080
 
     - Pour fermer le docker, saisir *docker-compose down*
 
 3 - Lancer le front-end
-        - Ouvrir un terminal de commande
-        - Accédez au repertoire du projet
-        - tapez les commandes suivantes
-            *npm install* attendez ensuite que l'installation ce termine
-            *npm start* pour le lancer
+    - Ouvrir un terminal de commande
+    - Accédez au repertoire du projet
+    - tapez les commandes suivantes
+        - *npm install* attendez ensuite que l'installation ce termine
+        - *npm start* pour le lancer
 
 
 ## Procédure pour lancer les tests
