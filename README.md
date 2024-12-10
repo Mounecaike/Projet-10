@@ -7,7 +7,7 @@ Pour le lancement du projet, vous aurez besoin de Docker, Node.js, NPM, cypress 
 2 - Lancer le backend
     - Lancer docker desktop
     - Lancer votre terminal de commande dans le dossier racine du projet
-       - Saisir *docker-compose up* et appuyer sur entrée pour lancer la commande
+       - Saisir *docker-compose up*
     
     - Le site est maintenant accessible a l'adresse : http://localhost:8080
 
