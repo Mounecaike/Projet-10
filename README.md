@@ -5,19 +5,17 @@ Pour le lancement du projet, vous aurez besoin de Docker, Node.js, NPM, cypress 
 1- cloner le repo github ou télécharger le zip *[https://github.com/OpenClassrooms-Student-Center/TesteurLogiciel_Automatisez_des_tests_pour_une_boutique_en_ligne.git]*
 
 2 - Lancer le backend
-    - Lancer docker desktop
-    - Lancer votre terminal de commande dans le dossier racine du projet
-       - Saisir *docker-compose up* et appuyer sur entrée pour lancer la commande.
-    
-    - Le site est maintenant accessible a l'adresse : http://localhost:8080
-
+    - Lancer docker desktop.  
+    - Lancer votre terminal de commande dans le dossier racine du projet :  
+    - Saisir *docker-compose up* et appuyer sur entrée pour lancer la commande.         
+    - Le site est maintenant accessible a l'adresse : http://localhost:8080        
     - Pour fermer le docker, saisir *docker-compose down*
 
 3 - Lancer le front-end
-    - Ouvrir un terminal de commande
-    - Accédez au repertoire du projet
-    - tapez les commandes suivantes
-        - *npm install* attendez ensuite que l'installation ce termine
+    - Ouvrir un terminal de commande  
+    - Accédez au repertoire du projet  
+    - tapez les commandes suivantes  
+        - *npm install* attendez ensuite que l'installation ce termine  
         - *npm start* pour le lancer
 
 
@@ -42,8 +40,8 @@ Pour le lancement du projet, vous aurez besoin de Docker, Node.js, NPM, cypress 
 
 Pour exécuter les tests et générer un rapport de résultats, suivez les étapes ci-dessous : 
 
-1- Ouvrir un terminal de commande
-    - Assurez vous que Node.js est installé sur votre machine et que cypress est configurer dans le projet, si ce n'est pas le cas vous pouvez telecharger le fichier d'installation ici 
+1- Ouvrir un terminal de commande  
+    - Assurez vous que Node.js est installé sur votre machine et que cypress est configurer dans le projet, si ce n'est pas le cas vous pouvez telecharger le fichier d'installation ici   
         [https://nodejs.org/en]
 
 2- Accédez au répertoire du projet
@@ -54,6 +52,7 @@ Pour exécuter les tests et générer un rapport de résultats, suivez les étap
 ## Infos login
 
 Identifiant: test2@test.fr
+
 Mot de passe: testtest
 
 ## Infos API
@@ -63,6 +62,7 @@ Le swagger du projet se trouve à l'adresse suivante: [http://localhost:8081/api
 ## Auteur
 
 Lachaume Jordan
+
 Email: rezok42@gmail.com
 
 ## Version utilisé
