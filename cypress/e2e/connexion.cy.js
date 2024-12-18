@@ -39,7 +39,6 @@ describe('E2E Test - simule diverse connexion', () => {
       cy.wait('@loginRequest').then((interception) => {
         // Vérifier que le statut HTTP est bien 401
         expect(interception.response.statusCode).to.eq(401);
-        // Optionnel : Vérifier que le message d'erreur dans la réponse est correct (si l'API le renvoie)
         expect(interception.response.body.message).to.eq('Invalid credentials.');
       });
     });
